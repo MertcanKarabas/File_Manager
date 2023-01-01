@@ -2,46 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <fcntl.h> //this is for open, close 
+
 int main () {
 
-    while(1) {
-
-        char input[50];
-        fgets(input, 50, stdin);
-        char *split = NULL;
-        split = strtok(input, " ");
-        char *inputs[100];
-        int counter = 0;
-        while(split != NULL) {
-            inputs[counter] = split;
-            split = strtok(NULL, " ");
-            counter++;
-        }
-
-        if ((strcmp(inputs[0], "create\n") == 0) ){
-            printf("Create calisti\n");
-            
-
-        } else if((strcmp(inputs[0], "delete\n") == 0)) {
-            printf("delete calisti\n");
-
-        } else if((strcmp(inputs[0], "read\n") == 0)) {
-            printf("read calisti\n");
-
-        } else if(strcmp(inputs[0], "write\n") == 0) {
-            printf("write calisti\n");
-
-        } else if (strcmp(inputs[0], "exit\n")) {
-            return 0;
-
-        } else if ((strcmp(inputs[0], "clear\n") == 0)) {
-            printf("\e[1;1H\e[2J");
-
-        } else {
-            printf("You gave wrong input.\n");
+    if (mkfifo("file_manager_named_pipe", 0777) == -1) { //fifo is created or not.
+        if (errno != EEXIST) { // If fifo is not created
+        printf ("Could not create fifo file\n");
+            return 1;
         }
     }
-
-
+    int fd = open("file_manager_named_pipe", O_WRONLY);    
+    if (fd == -1) {
+        return 2;
+    }
+    
     return 0;
 }
