@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "errno.h": "c",
+        "fcntl.h": "c"
     }
 }
