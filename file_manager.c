@@ -120,7 +120,7 @@ void * listen() {
             words[i] = (char*)malloc(sizeof(char));
 
         printf("named_pipe okuma için açılıyor...\n");
-        fd = open("file_manager_named_pipe", O_RDONLY);    
+        fd = open("file_manager_named_pipe", O_RDONLY); 
         if (fd == -1) {
             perror("named_pipe okuma için açılırken hata...\n");
             break;
@@ -166,6 +166,22 @@ void * listen() {
             printf("yanlis input girdiniz...\n");
         }
         close(fd);
+
+        fd = open("file_manager_named_pipe", O_WRONLY);
+        if (fd == -1) {
+            perror("named_pipe okuma için açılırken hata...\n");
+            break;
+        }
+        char response[50];
+        strcpy(response, words[0]);
+        strcat(response, " Done!");
+        printf("named_pipe yazma için açıldı..\n");
+        if(write(fd, response, sizeof(response)) == -1) {
+            printf("yazılırken hata..\n");
+            break;
+        }
+        printf("Comment sent!\n");
+        close(fd);
         free(words);
         pthread_mutex_unlock(&mutex);
     }
@@ -188,6 +204,7 @@ int main () {
         }
     }
     
-    
+    pthread_mutex_destroy(&mutex);
+
     return 0;
 }

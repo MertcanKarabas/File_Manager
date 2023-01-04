@@ -8,3 +8,4 @@ file_client: file_client.c
 
 clean:
 	rm -rf *o file_manager
+	rm -rf *o file_client
