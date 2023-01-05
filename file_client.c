@@ -10,7 +10,7 @@
 
 int main () {
     int fd;
-    
+
     while(1) {
         fflush(stdin);
         char input[50], temp[50];
@@ -18,7 +18,7 @@ int main () {
         int i, j, k;
         fgets(input, 50, stdin);  // Kullanıcıdan bir string alınır
         
-        char * words[3];
+        char * words[10];
         strncpy(temp, input, 50);
         char * token = strtok(temp, " "); // strtok fonksiyonu kullanılarak cümle kelimelere ayrılır
         i = 0;
@@ -49,6 +49,7 @@ int main () {
 
         if(strcmp(words[0], "Exit") == 0) {
             printf("Çıkış yapılıyor..\n");
+            close(fd);
             break;
         }
         close(fd);

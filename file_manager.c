@@ -70,6 +70,9 @@ bool fileListControl (char * file_name, int islem) { //islem 0 = ekleme, islem 1
 }
 
 void create_file(char *file_name) { //file liste ekleme ve dosyayı oluşturma
+    char response[50];
+    char * resp;
+    bool kontrol = false;
 
     if(fileListControl(file_name, 0)) {
 
@@ -77,43 +80,93 @@ void create_file(char *file_name) { //file liste ekleme ve dosyayı oluşturma
         FILE *file = fopen(file_name, "w");
     
         if(file == NULL) {
-            perror("error.");
+            resp = " Dosya açılamadı..\n";
+            perror("error.\n");
     
         } else {
         
             printf("create_file için dosya açıldı..\n");
+            resp = " dosya oluşturuldu..\n";
+            kontrol = true;
         }
         fclose(file);
 
     } else {
-        printf("file oluşturulamadı..");
+        printf("file oluşturulamadı..\n");
+        resp = " fosya oluşturulamadı..\n";
+    }
+    int fd;
+    fd = open("file_manager_named_pipe", O_WRONLY);
+    if (fd == -1) {
+        perror("named_pipe yazma için açılırken hata...\n");
     }
     
+    strcpy(response, "Create");
+    strcat(response, resp);
+    if(kontrol) {   
+        strcat(response, "Yaratılan Dosya: ");
+        strcat(response, file_name);
+    }
+    printf("named_pipe yazma için açıldı..\n");
+    if(write(fd, response, sizeof(response)) == -1) {
+        printf("yazılırken hata..\n");
+    }
+    printf("Comment sent!\n");
+    close(fd);  
 } 
-void delete_file(char *file_name) { //file listten ve sistemden dosyayı silme
 
+void delete_file(char *file_name) { //file listten ve sistemden dosyayı silme
+    
+    char response[50];
+    char * resp;
+    bool kontrol = false;
     if(fileListControl(file_name, 1)){
          printf("dosya siliniyor..\n");
         if (remove(file_name) == 0){
             printf("dosya silindi..\n");
-
-        } else
+            resp = " Dosya silindi.\n";
+            kontrol = true;
+        } else {
             printf("Unable to delete the file\n");
-
+            resp = " dosyaya erişilemiyor..\n";
+        }
     } else {
-        printf("file silinemedi..");
+        printf("file silinemedi..\n");
+        resp = " file silinemedi..\n";
     }
-   
+    int fd;
+    fd = open("file_manager_named_pipe", O_WRONLY);
+    if (fd == -1) {
+        perror("named_pipe yazma için açılırken hata...\n");
+    }
+    
+    strcpy(response, "Delete ");
+    strcat(response, resp);
+    if (kontrol) {
+        strcat(response, "Silinen Dosya: ");
+        strcat(response, file_name);
+    }
+    
+    printf("named_pipe yazma için açıldı..\n");
+    if(write(fd, response, sizeof(response)) == -1) {
+        printf("yazılırken hata..\n");
+    }
+    printf("Comment sent!\n");
+    close(fd);  
 }
+
 void read_file(char *file_name) { //dosyayı okuma
 
     char data[100];
+    char response[50];
+    char *resp;
+    bool kontrol = false;
     printf("read_file için dosya açılıyor..\n");
 
     FILE *file = fopen(file_name, "r");
     if(file == NULL) {
         perror("error.");
-
+        resp = " Dosya Açılırken Hata\n";
     }else {
         printf("read_file için dosya açıldı..\n");
 
@@ -121,13 +174,37 @@ void read_file(char *file_name) { //dosyayı okuma
             // Print the dataToBeRead
             printf( "%s" , data );
         }
-
+        resp = " Dosyadan Okundu.\n";
+        kontrol = true;
         fclose(file);
-    }   
+    }
+    int fd;
+    fd = open("file_manager_named_pipe", O_WRONLY);
+    if (fd == -1) {
+        perror("named_pipe yazma için açılırken hata...\n");
+        resp = " named_pipe yazma için açılırken hata...\n ";
+    }
+    
+    strcpy(response, "Read");
+    strcat(response, resp);
+    if (kontrol) {
+        strcat(response, "Okunan Data: ");
+        strcat(response, data);
+    } 
+    printf("named_pipe yazma için açıldı..\n");
+    if(write(fd, response, sizeof(response)) == -1) {
+        printf("yazılırken hata..\n");
+    }
+    printf("Comment sent!\n");
+    close(fd);   
 }
+
 void write_file(char *file_name, char * data) { //dosyanın içine veriyi yazma
 
     bool oDosyaVarMi = false;
+    char response[50];
+    char * resp;
+    bool kontrol = false;
     for (int j = 0; j < 10; j++) { //aynı isimde dosya olup olmadığını kontrol eden döngü
         if (file_list[j] == NULL) {
             continue;
@@ -135,13 +212,14 @@ void write_file(char *file_name, char * data) { //dosyanın içine veriyi yazma
             oDosyaVarMi = true;
         }
     }
+
     if(oDosyaVarMi) {
         printf("write_file için dosya açılıyor..\n");
 
         FILE *file = fopen(file_name, "a");
         if(file == NULL) {
             perror("error.");
-
+            resp = "Dosya Açma Hatası";
         }else {
             printf("write_file için dosya açıldı..\n");
 
@@ -150,14 +228,34 @@ void write_file(char *file_name, char * data) { //dosyanın içine veriyi yazma
                 printf("write_file data yazılıyor..\n");
                 fputs(data, file) ;
                 fputs("\n", file) ;
-            }    
-
+            }
+            resp = " Dosyaya Yazıldı.";    
+            kontrol = true;
             fclose(file);
         }
+            
     } else {
         printf("önce dosyayı oluşturmalısın..");
+        resp = "Önce Dosya Oluşturulmalı";
+    }
+    int fd;
+    fd = open("file_manager_named_pipe", O_WRONLY);
+    if (fd == -1) {
+        perror("named_pipe yazma için açılırken hata...\n");
+    }
+    strcpy(response, "Write");
+    strcat(response, resp);
+    if (kontrol) {
+        strcat(response, "Yazılan Data: ");
+        strcat(response, data);
     }
     
+    printf("named_pipe yazma için açıldı..\n");
+    if(write(fd, response, sizeof(response)) == -1) {
+        printf("yazılırken hata..\n");
+    }
+    printf("Comment sent!\n");
+    close(fd);
 }
 
 void namedPipeOlustur() {
@@ -180,8 +278,7 @@ void * listen() {
         
         pthread_mutex_lock(&mutex);
         char input[50]; 
-        char *words[3];
-        
+        char *words[10];
         int i, j, k;
         for (i = 0; i < 10; i++)
             printf("%d. File: %s\n", (i+1), file_list[i]);
@@ -207,6 +304,7 @@ void * listen() {
             token = strtok(NULL, " "); // sonraki kelime alınır
         }
         words[i-1] = strtok(words[i-1], "\n");
+
         if(strcmp(words[0], "Create") == 0) {
             
             create_file(words[1]);
@@ -230,23 +328,10 @@ void * listen() {
         } else {
             printf("yanlis input girdiniz...\n");
         }
+
         close(fd);
 
-        fd = open("file_manager_named_pipe", O_WRONLY);
-        if (fd == -1) {
-            perror("named_pipe okuma için açılırken hata...\n");
-            break;
-        }
-        char response[50];
-        strcpy(response, words[0]);
-        strcat(response, " Done!");
-        printf("named_pipe yazma için açıldı..\n");
-        if(write(fd, response, sizeof(response)) == -1) {
-            printf("yazılırken hata..\n");
-            break;
-        }
-        printf("Comment sent!\n");
-        close(fd);
+        
         pthread_mutex_unlock(&mutex);
     }
 }
@@ -254,7 +339,7 @@ void * listen() {
 int main () {
     
     pthread_mutex_init(&mutex, NULL);
-
+    
     for(int i = 0; i < 5; i++) {
         if(pthread_create(&thread_list[i], NULL, &listen, NULL) != 0) {
             perror("thread oluşturulurken hata...");
