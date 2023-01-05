@@ -40,8 +40,8 @@ bool fileListControl (char * file_name, int islem) { //islem 0 = ekleme, islem 1
                 res = true;
                 return res;
             }
-            if (i >= 10) {
-                printf("no empty place.\n");
+            if (i == 9) {
+                printf("yer yok.\n");
                 return res;
             } 
 
@@ -57,9 +57,9 @@ bool fileListControl (char * file_name, int islem) { //islem 0 = ekleme, islem 1
                 return res;
             }
 
-            if (i >= 10) {
-                printf("wrong file name\n");
-                return res;;
+            if (i == 9) {
+                printf("yanliş file ismi\n");
+                return res;
             } 
         }
     }
@@ -164,14 +164,13 @@ void * listen() {
     while(1){
         
         pthread_mutex_lock(&mutex);
-        char input[50];
-        char **words;
-        words = (char**)malloc(sizeof(char*));
+        char *input[10];
+        
+        
         int i, j, k;
         for (i = 0; i < 10; i++)
             printf("%d. File: %s\n", (i+1), file_list[i]);
-        for (i = 0; i < 10; i++)
-            words[i] = (char*)malloc(sizeof(char));
+        
 
         printf("named_pipe okuma için açılıyor...\n");
         fd = open("file_manager_named_pipe", O_RDONLY); 
@@ -186,39 +185,29 @@ void * listen() {
             break;
         }
         
-        i = 0; j = 0;
-        int len = strlen(input);
-        // "command" array'i içerisinde kelime kelime ayrıştırılır
-        for (k = 0; k < len; k++) {
-            // Eğer kelime sonuna gelinmişse, j'yi sıfırla ve i'yi bir arttır
-            if (input[k] == ' ' || input[k] == '\0' || input[k] == '\n') {
-                words[i][j] = '\0';
-                i++;
-                j = 0;
-            } else {
-            // Aksi halde, kelimeyi "words" array'ine at
-                words[i][j] = input[k];
-                j++;
-            }
+        
+        j = 0;
+        while(input[j] != NULL) {
+            printf("LWORD: %s\n", input[j++]);
         }
 
-        if(strcmp(words[0], "Create") == 0) {
+        if(strcmp(input[0], "Create") == 0) {
             
-            create_file(words[1]);
+            create_file(input[1]);
 
-        } else if(strcmp(words[0], "Delete") == 0){
+        } else if(strcmp(input[0], "Delete") == 0){
 
-            delete_file(words[1]);
+            delete_file(input[1]);
 
-        } else if(strcmp(words[0], "Read") == 0){
+        } else if(strcmp(input[0], "Read") == 0){
             
-            read_file(words[1]);
+            read_file(input[1]);
 
-        } else if(strcmp(words[0], "Write") == 0){
+        } else if(strcmp(input[0], "Write") == 0){
             
-            write_file(words[1], words[2]);
+            write_file(input[1], input[2]);
 
-        } else if(strcmp(words[0], "Exit") == 0){
+        } else if(strcmp(input[0], "Exit") == 0){
             
             printf("cikis yapılıyor...");
             break;
@@ -233,7 +222,7 @@ void * listen() {
             break;
         }
         char response[50];
-        strcpy(response, words[0]);
+        strcpy(response, input[0]);
         strcat(response, " Done!");
         printf("named_pipe yazma için açıldı..\n");
         if(write(fd, response, sizeof(response)) == -1) {
@@ -242,7 +231,6 @@ void * listen() {
         }
         printf("Comment sent!\n");
         close(fd);
-        free(words);
         pthread_mutex_unlock(&mutex);
     }
 }

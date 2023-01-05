@@ -14,15 +14,16 @@ int main () {
     while(1) {
         char input[50];
         char response[50];
-        char **words;
         int i, j, k;
         fgets(input, 50, stdin);  // Kullanıcıdan bir string alınır
+        char * words[10];
+        char * token = strtok(input, " "); // strtok fonksiyonu kullanılarak cümle kelimelere ayrılır
+        i = 0;
+        while (token != NULL) { // kelime NULL olana kadar döngü
+            words[i++] = token;
+            token = strtok(NULL, " "); // sonraki kelime alınır
+        }
 
-        words = (char**)malloc(sizeof(char*));
-        for (i = 0; i < 10; i++)
-            words[i] = (char*)malloc(sizeof(char));
-
-        input[strlen(input) -1 ] = '\0'; //enter karakterini sil.
         fd = open("file_manager_named_pipe", O_WRONLY);
         if (fd == -1) {
             printf("named_pipe açılırken hata..\n");
@@ -30,27 +31,12 @@ int main () {
         }
 
         printf("named_pipe yazma için açıldı..\n");
-        if(write(fd, input, sizeof(input)) == -1) {
+        if(write(fd, &words, sizeof(input)) == -1) {
             printf("yazılırken hata..\n");
             return 2;
         }
         printf("Comment sent!\n");
 
-        i = 0; j = 0;
-        int len = strlen(input);
-        // "command" array'i içerisinde kelime kelime ayrıştırılır
-        for (k = 0; k < len; k++) {
-            // Eğer kelime sonuna gelinmişse, j'yi sıfırla ve i'yi bir arttır
-            if (input[k] == ' ' || input[k] == '\0' || input[k] == '\n') {
-                words[i][j] = '\0';
-                i++;
-                j = 0;
-            } else {
-            // Aksi halde, kelimeyi "words" array'ine at
-                words[i][j] = input[k];
-                j++;
-            }
-        }
 
         if(strcmp(words[0], "Exit") == 0) {
             printf("Çıkış yapılıyor..\n");
@@ -70,8 +56,7 @@ int main () {
             break;
         }
         printf("%s\n", response);
-        close(fd);
-        free(words);       
+        close(fd);       
     }
     printf("pipe kapanıyor..\n");
     

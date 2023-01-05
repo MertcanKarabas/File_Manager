@@ -40,8 +40,8 @@ bool fileListControl (char * file_name, int islem) { //islem 0 = ekleme, islem 1
                 res = true;
                 return res;
             }
-            if (i >= 10) {
-                printf("no empty place.\n");
+            if (i == 9) {
+                printf("yer yok.\n");
                 return res;
             } 
 
@@ -57,9 +57,9 @@ bool fileListControl (char * file_name, int islem) { //islem 0 = ekleme, islem 1
                 return res;
             }
 
-            if (i >= 10) {
-                printf("wrong file name\n");
-                return res;;
+            if (i == 9) {
+                printf("yanliş file ismi\n");
+                return res;
             } 
         }
     }
