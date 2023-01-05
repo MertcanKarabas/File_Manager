@@ -16,26 +16,28 @@ pthread_mutex_t mutex;
 bool fileListControl (char * file_name, int islem) { //islem 0 = ekleme, islem 1 = çıkarma
 
     bool res = false;
+    bool oDosyaVarMi = false;
+
+    for (int j = 0; j < 10; j++) { //aynı isimde dosya olup olmadığını kontrol eden döngü
+        if (file_list[j] == NULL) {
+            continue;
+        } else if(strcmp(file_list[j], file_name) == 0) {
+            oDosyaVarMi = true;
+        }
+    }
 
     for(int i = 0; i< 10; i++) { //file list içini kontrol etmek için döngü
 
         if(islem == 0) { //ekleme
-
-            bool oDosyaVarMi = false;
-            for (int j = 0; j < 10; j++) { //aynı isimde dosya olup olmadığını kontrol eden döngü
-                if (file_list[i] == NULL) {
-                    continue;
-                } else if(strcmp(file_list[i], file_name) == 0) {
-                    oDosyaVarMi = true;
-                }
-            }
 
             if (oDosyaVarMi) {
                 printf("ayni isimde dosya olduğundan oluşturulamadı..\n");
                 return res;
 
             } else if(file_list[i] == NULL) {
-                file_list[i] = file_name;
+                char *file_name2 = malloc(sizeof(file_name2));
+                strcpy(file_name2, file_name);
+                file_list[i] = file_name2;
                 printf("added.\n");
                 res = true;
                 return res;
@@ -125,24 +127,37 @@ void read_file(char *file_name) { //dosyayı okuma
 }
 void write_file(char *file_name, char * data) { //dosyanın içine veriyi yazma
 
-    printf("write_file için dosya açılıyor..\n");
-
-    FILE *file = fopen(file_name, "a");
-    if(file == NULL) {
-        perror("error.");
-
-    }else {
-        printf("write_file için dosya açıldı..\n");
-
-        if ( strlen ( data ) > 0 ) {
-            // writing in the file using fputs()
-            printf("write_file data yazılıyor..\n");
-            fputs(data, file) ;
-            fputs("\n", file) ;
-        }    
-
-        fclose(file);
+    bool oDosyaVarMi = false;
+    for (int j = 0; j < 10; j++) { //aynı isimde dosya olup olmadığını kontrol eden döngü
+        if (file_list[j] == NULL) {
+            continue;
+        } else if(strcmp(file_list[j], file_name) == 0) {
+            oDosyaVarMi = true;
+        }
     }
+    if(oDosyaVarMi) {
+        printf("write_file için dosya açılıyor..\n");
+
+        FILE *file = fopen(file_name, "a");
+        if(file == NULL) {
+            perror("error.");
+
+        }else {
+            printf("write_file için dosya açıldı..\n");
+
+            if ( strlen ( data ) > 0 ) {
+                // writing in the file using fputs()
+                printf("write_file data yazılıyor..\n");
+                fputs(data, file) ;
+                fputs("\n", file) ;
+            }    
+
+            fclose(file);
+        }
+    } else {
+        printf("önce dosyayı oluşturmalısın..");
+    }
+    
 }
 
 void namedPipeOlustur() {
@@ -164,15 +179,14 @@ void * listen() {
     while(1){
         
         pthread_mutex_lock(&mutex);
-        char input[50];
-        char **words;
-        words = (char**)malloc(sizeof(char*));
+        char input[50]; 
+        char *words[3];
+        
         int i, j, k;
         for (i = 0; i < 10; i++)
             printf("%d. File: %s\n", (i+1), file_list[i]);
-        for (i = 0; i < 10; i++)
-            words[i] = (char*)malloc(sizeof(char));
-
+        
+        
         printf("named_pipe okuma için açılıyor...\n");
         fd = open("file_manager_named_pipe", O_RDONLY); 
         if (fd == -1) {
@@ -185,23 +199,14 @@ void * listen() {
             perror("okunurken hata..\n");
             break;
         }
-        
-        i = 0; j = 0;
-        int len = strlen(input);
-        // "command" array'i içerisinde kelime kelime ayrıştırılır
-        for (k = 0; k < len; k++) {
-            // Eğer kelime sonuna gelinmişse, j'yi sıfırla ve i'yi bir arttır
-            if (input[k] == ' ' || input[k] == '\0' || input[k] == '\n') {
-                words[i][j] = '\0';
-                i++;
-                j = 0;
-            } else {
-            // Aksi halde, kelimeyi "words" array'ine at
-                words[i][j] = input[k];
-                j++;
-            }
-        }
 
+        char * token = strtok(input, " "); // strtok fonksiyonu kullanılarak cümle kelimelere ayrılır
+        i = 0;
+        while (token != NULL) { // kelime NULL olana kadar döngü
+            words[i++] = token;
+            token = strtok(NULL, " "); // sonraki kelime alınır
+        }
+        words[i-1] = strtok(words[i-1], "\n");
         if(strcmp(words[0], "Create") == 0) {
             
             create_file(words[1]);
@@ -242,7 +247,6 @@ void * listen() {
         }
         printf("Comment sent!\n");
         close(fd);
-        free(words);
         pthread_mutex_unlock(&mutex);
     }
 }

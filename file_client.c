@@ -12,26 +12,35 @@ int main () {
     int fd;
     
     while(1) {
-        char input[50];
+        fflush(stdin);
+        char input[50], temp[50];
         char response[50];
         int i, j, k;
         fgets(input, 50, stdin);  // Kullanıcıdan bir string alınır
-        char * words[10];
-        char * token = strtok(input, " "); // strtok fonksiyonu kullanılarak cümle kelimelere ayrılır
+        
+        char * words[3];
+        strncpy(temp, input, 50);
+        char * token = strtok(temp, " "); // strtok fonksiyonu kullanılarak cümle kelimelere ayrılır
         i = 0;
         while (token != NULL) { // kelime NULL olana kadar döngü
             words[i++] = token;
             token = strtok(NULL, " "); // sonraki kelime alınır
         }
+        words[i-1] = strtok(words[i-1], "\n");
 
+        // j = 0;
+        // while(words[j] != NULL) {
+        //     printf("Word: %s\n", words[j++]);
+        // }
         fd = open("file_manager_named_pipe", O_WRONLY);
         if (fd == -1) {
             printf("named_pipe açılırken hata..\n");
             return 1;
         }
-
+        
+        
         printf("named_pipe yazma için açıldı..\n");
-        if(write(fd, &words, sizeof(input)) == -1) {
+        if(write(fd, input, sizeof(input)) == -1) {
             printf("yazılırken hata..\n");
             return 2;
         }

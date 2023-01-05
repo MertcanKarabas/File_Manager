@@ -4,5 +4,12 @@
         "errno.h": "c",
         "fcntl.h": "c",
         "string.h": "c"
-    }
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/Users/mertcankarabas/Desktop/Ders Notları/Operating Systems/Projeler/Proje 2/testproject",
+            "binaryPath": "/Users/mertcankarabas/Desktop/Ders Notları/Operating Systems/Projeler/Proje 2/testproject/file_client",
+            "binaryArgs": []
+        }
+    ]
 }

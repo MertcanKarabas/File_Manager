@@ -2,9 +2,9 @@
 #include <string.h>
 
 int main(void) {
-  char sentence[100]; // char dizisi oluşturulur
+  char sentence[100] = "sa as nbr ii nbr sa"; // char dizisi oluşturulur
   printf("Enter a sentence: ");
-  fgets(sentence, 100, stdin); // Kullanıcıdan cümle alınır
+  //fgets(sentence, 100, stdin); // Kullanıcıdan cümle alınır
   char *words[10];
   char * token = strtok(sentence, " "); // strtok fonksiyonu kullanılarak cümle kelimelere ayrılır
   int i = 0;
