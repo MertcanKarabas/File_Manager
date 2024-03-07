@@ -1,4 +1,4 @@
-# Operating_Systems_File_Manager
+# File_Manager
 Bu repoda bulunan dosya 3.sınıf dersi olan Operating Systems(İşletim Sistemleri) dersinin 2. proje ödevi olan dosya yöneticisi yapmak üzere 
 oluşturulmuştur. Elbette ki bu dosyada bulunan eksik ve hatalı olabilir. Threadler ve lock mekanizmaları yanlış yerde bulunuyor olabilir ancak
 dosya ekleme, çıkarma, dosyayı okuma ve veri yazma işlemleri stabil bir şekilde çalıştığı düşünülmektedir.
